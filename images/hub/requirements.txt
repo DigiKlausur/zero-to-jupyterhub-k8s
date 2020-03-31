@@ -22,7 +22,7 @@ jupyterhub-ltiauthenticator==0.4.*
 # https://github.com/jupyterhub/ldapauthenticator
 # https://pypi.org/project/jupyterhub-ldapauthenticator
 # NEEDS NEW RELEASE
-jupyterhub-ldapauthenticator==1.2.*
+#jupyterhub-ldapauthenticator==1.2.*
 
 # https://github.com/jupyterhub/hmacauthenticator
 # https://pypi.org/project/jupyterhub-hmacauthenticator
