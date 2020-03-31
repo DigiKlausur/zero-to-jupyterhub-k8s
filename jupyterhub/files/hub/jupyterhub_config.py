@@ -358,6 +358,8 @@ set_config_if_not_none(c.Authenticator, 'enable_auth_state', 'auth.state.enabled
 set_config_if_not_none(c.JupyterHub, 'admin_access', 'auth.admin.access')
 set_config_if_not_none(c.Authenticator, 'admin_users', 'auth.admin.users')
 set_config_if_not_none(c.Authenticator, 'whitelist', 'auth.whitelist.users')
+set_config_if_not_none(c.Authenticator, 'ldap_whitelist', 'auth.whitelist.users')
+set_config_if_not_none(c.Authenticator, 'check_account', 'auth.whitelist.ldap.enabled')
 
 c.JupyterHub.services = []
 
