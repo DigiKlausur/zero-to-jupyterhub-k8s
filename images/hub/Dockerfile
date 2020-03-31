@@ -41,6 +41,16 @@ RUN adduser --disabled-password \
     ${NB_USER}
 
 ADD requirements.txt /tmp/requirements.txt
+
+#Install native atuhenticator
+RUN cd /srv && git clone https://github.com/jupyterhub/nativeauthenticator.git \
+    && cd nativeauthenticator \
+    && pip3 install -e .
+
+RUN cd /srv && git clone https://github.com/DigiKlausur/ldapauthenticator.git \
+    && cd /srv/ldapauthenticator \
+    && pip3 install .
+
 RUN PYCURL_SSL_LIBRARY=openssl pip3 install --no-cache-dir \
          -r /tmp/requirements.txt \
          $(bash -c 'if [[ $JUPYTERHUB_VERSION == "git"* ]]; then \
