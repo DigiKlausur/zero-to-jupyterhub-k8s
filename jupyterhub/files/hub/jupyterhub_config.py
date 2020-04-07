@@ -5,6 +5,7 @@ import sys
 from tornado.httpclient import AsyncHTTPClient
 from kubernetes import client
 from jupyterhub.utils import url_path_join
+import pandas as pd
 
 # Make sure that modules placed in the same directory as the jupyterhub config are added to the pythonpath
 configuration_directory = os.path.dirname(os.path.realpath(__file__))
@@ -246,6 +247,56 @@ elif storage_type == 'static':
 c.KubeSpawner.volumes.extend(get_config('singleuser.storage.extraVolumes', []))
 c.KubeSpawner.volume_mounts.extend(get_config('singleuser.storage.extraVolumeMounts', []))
 
+# Find in the database how many courses this user is registered to
+# Prespawn hoot to mount course volume the user is registered to
+# Use sqlite instead of csv?
+# TODO: 
+async def pre_spawn_hook(spawner):
+    await spawner.load_user_options()
+    username = spawner.user.name
+    course_enabled = get_config('hub.db.course.enabled', False)
+    if course_enabled:
+        nbgrader_volume_name = get_config('singleuser.storage.nbgraderVolume.name', None)
+        nbgrader_volume_subpath = get_config('singleuser.storage.nbgraderVolume.subPath', '_nbgrader/exchange')
+        if nbgrader_volume_name is not None:
+            db_root = '/srv/nbgrader/course_db'
+            if os.path.isdir(db_root):
+                registered_users = {}
+                db_files = [db_file for db_file in os.listdir(db_root) \
+                           if os.path.isfile(os.path.join(db_root, db_file)) and \
+                           ".csv" in db_file]
+                for db_file in db_files:
+                    course_name = os.path.splitext(db_file)[0]
+                    db_file_pd = pd.read_csv(os.path.join(db_root, db_file))
+                    student_list = list(db_file_pd.FB02UID)
+                    if course_name not in registered_users:
+                        registered_users[course_name] = student_list
+                    else:
+                        registered_users[course_name].extend(student_list)
+                
+                nbgrader_volume_mount = []            
+                for course_name in registered_users.keys():
+                    for user_id in registered_users[course_name]:
+                        if user_id == username:
+                            print ("Found course ", course_name, "for user ", user_id)
+                            user_volume_mount = {}
+                            user_volume_mount['mountPath'] = "/srv/nbgrader/exchange/{}".format(course_name)
+                            user_volume_mount['name'] = nbgrader_volume_name
+                            user_volume_mount['subPath'] = nbgrader_volume_subpath + "/{}".format(course_name)
+                            nbgrader_volume_mount.append(user_volume_mount)
+                
+                print("Mounting... ")
+                print(nbgrader_volume_mount) 
+                
+                spawner.volume_mounts.extend(nbgrader_volume_mount)
+            else:
+                print("Could not find shared course_db: ", db_root, " is not a directory")
+                print("Check extraVolume is configured in the hub container")
+        else:
+            print("Nbgrader volume name is not specified")
+          
+c.KubeSpawner.pre_spawn_hook = pre_spawn_hook
+    
 # Gives spawned containers access to the API of the hub
 c.JupyterHub.hub_connect_ip = os.environ['HUB_SERVICE_HOST']
 c.JupyterHub.hub_connect_port = int(os.environ['HUB_SERVICE_PORT'])
