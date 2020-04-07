@@ -38,6 +38,8 @@ hub:
       storageClassName:
     url:
     password:
+    course:
+      enabled: false
   labels: {}
   annotations: {}
   extraConfig: {}
@@ -47,8 +49,8 @@ hub:
   extraVolumes: []
   extraVolumeMounts: []
   image:
-    name: jupyterhub/k8s-hub
-    tag: 'set-by-chartpress'
+    name: digiklausur/k8s-hub
+    tag: 'e2x-0.9.0-beta.3'
     # pullSecrets:
     #   - secretName
   resources:
@@ -157,7 +159,7 @@ proxy:
   secretSync:
     image:
       name: jupyterhub/k8s-secret-sync
-      tag: 'set-by-chartpress'
+      tag: '0.9.0-beta.3'
     resources: {}
   labels: {}
   nodeSelector: {}
@@ -223,7 +225,7 @@ singleuser:
   networkTools:
     image:
       name: jupyterhub/k8s-network-tools
-      tag: 'set-by-chartpress'
+      tag: '0.9.0-beta.3'
   cloudMetadata:
     enabled: false
     ip: 169.254.169.254
@@ -263,9 +265,12 @@ singleuser:
       pvcNameTemplate: claim-{username}{servername}
       volumeNameTemplate: volume-{username}{servername}
       storageAccessModes: [ReadWriteOnce]
+    nbgraderVolume:
+      name:
+      subPath:
   image:
     name: jupyterhub/k8s-singleuser-sample
-    tag: 'set-by-chartpress'
+    tag: '0.9.0-beta.3'
     pullPolicy: IfNotPresent
     # pullSecrets:
     #   - secretName
@@ -336,7 +341,7 @@ prePuller:
     enabled: true
     image:
       name: jupyterhub/k8s-image-awaiter
-      tag: 'set-by-chartpress'
+      tag: '0.9.0-beta.3'
   continuous:
     enabled: true
   extraImages: {}
