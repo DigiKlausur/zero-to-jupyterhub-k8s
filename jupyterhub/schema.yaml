@@ -281,6 +281,16 @@ properties:
               - "null"
             description: |
               Password for the database when `hub.db.type` is mysql or postgres.
+          course:
+            type: object
+            description: |
+              Options for costumizing user exchange directory based on registered courses
+            properties:
+              enabled:
+                type: boolean
+                description: |
+                  Enable the multiple course for students based on the data (CSV)
+                  located in the extraVolumes, mounted with nfs from grading server
       labels:
         type: object
         description: |
