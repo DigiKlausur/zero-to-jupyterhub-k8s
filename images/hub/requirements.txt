@@ -81,3 +81,4 @@ cryptography==2.8.*
 
 # py-spy is useful for profiling running hubs
 py-spy
+pandas==1.0.3
