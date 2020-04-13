@@ -4,6 +4,9 @@ FROM ubuntu:18.04
 ##       chartpress.yaml configuration
 ARG JUPYTERHUB_VERSION=1.0.*
 
+ENV TZ=Europe/Berlin
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       git \
@@ -45,11 +48,11 @@ ADD requirements.txt /tmp/requirements.txt
 #Install native atuhenticator
 RUN cd /srv && git clone https://github.com/jupyterhub/nativeauthenticator.git \
     && cd nativeauthenticator \
-    && pip3 install -e .
+    && pip3 install --no-cache-dir -e .
 
 RUN cd /srv && git clone https://github.com/DigiKlausur/ldapauthenticator.git \
     && cd /srv/ldapauthenticator \
-    && pip3 install .
+    && pip3 install --no-cache-dir .
 
 RUN PYCURL_SSL_LIBRARY=openssl pip3 install --no-cache-dir \
          -r /tmp/requirements.txt \
