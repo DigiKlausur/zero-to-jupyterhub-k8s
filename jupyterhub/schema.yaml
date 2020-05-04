@@ -855,7 +855,7 @@ properties:
 
           **NOTE**: The image-pullers are aware of the overrides of images in
           `singleuser.profileList` but they won't be if you configure it in
-          JupyterHub's configuration of '`c.KubeSpawner.profile_list`.
+          JupyterHub's configuration of `c.KubeSpawner.profile_list`.
 
           ```yaml
           singleuser:
