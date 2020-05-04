@@ -274,21 +274,35 @@ async def pre_spawn_hook(spawner):
                     else:
                         registered_users[course_name].extend(student_list)
                 
+                existing_mounts = spawner.volume_mounts
+                print ("Existing mounts: ")
+                #print (existing_mounts)
                 nbgrader_volume_mount = []            
                 for course_name in registered_users.keys():
                     for user_id in registered_users[course_name]:
                         if user_id == username:
                             print ("Found course ", course_name, "for user ", user_id)
-                            user_volume_mount = {}
-                            user_volume_mount['mountPath'] = "/srv/nbgrader/exchange/{}".format(course_name)
+                            mount_dir ="/srv/nbgrader/exchange/{}".format(course_name)
+                            user_volume_mount = {}       
+                            user_volume_mount['mountPath'] = mount_dir
                             user_volume_mount['name'] = nbgrader_volume_name
                             user_volume_mount['subPath'] = nbgrader_volume_subpath + "/{}".format(course_name)
-                            nbgrader_volume_mount.append(user_volume_mount)
+                            existing_mounts.append(user_volume_mount)
+                            print("Adding volume... ", user_volume_mount)
                 
-                print("Mounting... ")
-                print(nbgrader_volume_mount) 
-                
-                spawner.volume_mounts.extend(nbgrader_volume_mount)
+                print ("Updated existing mounts")
+                print(existing_mounts)
+                print ("Checking no double mounts")
+                for i,ext_mnt in enumerate(existing_mounts):
+                    for j,ext_mnt_tmp in enumerate(existing_mounts):
+                        if i != j:
+                            if ext_mnt['mountPath'] == ext_mnt_tmp['mountPath']:
+                                del existing_mounts[i]
+
+                spawner.volume_mounts = existing_mounts
+  
+                print("All mounts for ", username)
+                print (spawner.volume_mounts)
             else:
                 print("Could not find shared course_db: ", db_root, " is not a directory")
                 print("Check extraVolume is configured in the hub container")
